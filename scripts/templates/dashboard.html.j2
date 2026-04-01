@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulso Cultura - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --favorable: #28a745;
+            --indeciso: #ffc107;
+            --desfavorable: #dc3545;
+            --femenino: #FFB6C1;
+            --masculino: #6CA6CD;
+            --bg-body: #f0f2f5;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        body { background: var(--bg-body); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        .dashboard-header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: #fff; padding: 1.2rem 0; margin-bottom: 1.5rem;
+        }
+        .dashboard-header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; }
+        .dashboard-header .subtitle { opacity: 0.85; font-size: 0.9rem; }
+        .card { border: none; border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 1.2rem; }
+        .card-header { background: #fff; border-bottom: 2px solid #e9ecef; border-radius: 12px 12px 0 0 !important; font-weight: 600; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: #1a237e; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 3px solid #1a237e; }
+        .kpi-card { text-align: center; padding: 1.5rem; }
+        .kpi-number { font-size: 3rem; font-weight: 800; color: #1a237e; }
+        .kpi-label { font-size: 0.95rem; color: #6c757d; margin-top: 0.3rem; }
+        .filter-section { background: #fff; border-radius: 12px; padding: 1rem 1.2rem; }
+        .filter-label { font-size: 0.8rem; font-weight: 600; color: #495057; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-select { border-radius: 8px; border-color: #dee2e6; font-size: 0.875rem; }
+        .form-select:focus { border-color: #1a237e; box-shadow: 0 0 0 0.2rem rgba(26,35,126,0.15); }
+        .chart-container { position: relative; width: 100%; }
+        .chart-container.pie { max-width: 300px; margin: 0 auto; }
+        .btn-export { background: #1a237e; border: none; font-size: 0.85rem; border-radius: 8px; }
+        .btn-export:hover { background: #283593; }
+        .btn-clear { font-size: 0.85rem; border-radius: 8px; }
+        .detail-table { font-size: 0.82rem; }
+        .detail-table th { background: #1a237e; color: #fff; font-weight: 600; position: sticky; top: 0; }
+        .detail-table td { vertical-align: middle; }
+        .mini-bar-container { display: flex; height: 22px; border-radius: 4px; overflow: hidden; min-width: 150px; }
+        .mini-bar { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 600; }
+        .filter-divider { border-left: 2px solid #dee2e6; }
+        @media (max-width: 768px) {
+            .filter-divider { border-left: none; border-top: 2px solid #dee2e6; padding-top: 1rem; margin-top: 1rem; }
+            .kpi-number { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="dashboard-header">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="bi bi-bar-chart-fill me-2"></i>Pulso Cultura - Dashboard de Resultados</h1>
+                <div class="subtitle">Super de Alimentos S.A. | Encuesta de Clima Organizacional</div>
+            </div>
+            <button class="btn btn-light btn-export" onclick="exportCSV()">
+                <i class="bi bi-download me-1"></i> Exportar CSV
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4">
+
+    <!-- FILTERS -->
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center">
+            <i class="bi bi-funnel-fill me-2 text-primary"></i> Filtros
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Demographic Filters -->
+                <div class="col-lg-7">
+                    <div class="mb-2" style="font-size:0.85rem;font-weight:700;color:#1a237e;">
+                        <i class="bi bi-people-fill me-1"></i> Filtros Demograficos
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <div class="filter-label">Genero</div>
+                            <select id="filterGenero" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-label">Edad</div>
+                            <select id="filterEdad" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-label">Antiguedad</div>
+                            <select id="filterAntiguedad" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-label">Estudios Cursados</div>
+                            <select id="filterEstudios" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Area Filters -->
+                <div class="col-lg-4 filter-divider ps-lg-4">
+                    <div class="mb-2" style="font-size:0.85rem;font-weight:700;color:#1a237e;">
+                        <i class="bi bi-building me-1"></i> Filtros de Area
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="filter-label">Centro</div>
+                            <select id="filterCentro" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="filter-label">Planta</div>
+                            <select id="filterPlanta" class="form-select form-select-sm" onchange="applyFilters()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!-- Clear button -->
+                <div class="col-lg-1 d-flex align-items-end justify-content-end">
+                    <button class="btn btn-outline-secondary btn-clear btn-sm w-100" onclick="clearFilters()">
+                        <i class="bi bi-x-circle me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI + PIE -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body kpi-card">
+                    <div class="kpi-label"><i class="bi bi-person-check-fill me-1"></i>Total de Encuestados</div>
+                    <div class="kpi-number" id="totalEncuestados">0</div>
+                    <div class="text-muted" style="font-size:0.8rem;" id="totalSubtext"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Favorabilidad Global</div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="chart-container pie">
+                        <canvas id="chartPie"></canvas>
+                    </div>
+                    <div id="pieStats" class="ms-4" style="font-size:0.9rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOCIODEMOGRAPHIC -->
+    <div class="section-title"><i class="bi bi-person-vcard me-2"></i>Caracterizacion Sociodemografica</div>
+    <div class="row mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-header">Genero</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartGenero"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-header">Edad</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartEdad"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-header">Antiguedad</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartAntiguedad"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-header">Estudios Cursados</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartEstudios"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SURVEY RESULTS -->
+    <div class="section-title"><i class="bi bi-clipboard-data me-2"></i>Resultados de Encuesta</div>
+
+    <!-- Favorability by Question -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-bar-chart-steps me-2 text-success"></i>Favorabilidad por Pregunta</div>
+        <div class="card-body">
+            <div class="chart-container" style="min-height:400px;"><canvas id="chartFavPregunta"></canvas></div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-building me-2 text-primary"></i>Favorabilidad por Centro</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartFavCentro"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-diagram-3 me-2 text-info"></i>Favorabilidad por Planta</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartFavPlanta"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIMENSION & VARIABLE ANALYSIS -->
+    <div class="section-title"><i class="bi bi-diagram-2 me-2"></i>Analisis por Dimension y Variable</div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-layers me-2 text-warning"></i>Favorabilidad por Dimension</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartFavDimension"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-tags me-2 text-danger"></i>Favorabilidad por Variable</div>
+                <div class="card-body"><div class="chart-container"><canvas id="chartFavVariable"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Table -->
+    <div class="card mb-5">
+        <div class="card-header"><i class="bi bi-table me-2 text-secondary"></i>Tabla Detallada: Dimension / Variable / Pregunta</div>
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height:600px;overflow-y:auto;">
+                <table class="table table-hover detail-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Dimension</th>
+                            <th>Variable</th>
+                            <th>Pregunta</th>
+                            <th style="min-width:100px;">Favorable</th>
+                            <th style="min-width:100px;">Indeciso</th>
+                            <th style="min-width:100px;">Desfavorable</th>
+                            <th style="min-width:200px;">Distribucion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- CDN Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+// =====================================================================
+// DATA (embedded by Python)
+// =====================================================================
+const DASHBOARD_DATA = {{ dashboard_data_json }};
+
+// =====================================================================
+// GLOBALS
+// =====================================================================
+const COLORS = {
+    favorable: '#28a745',
+    indeciso: '#ffc107',
+    desfavorable: '#dc3545',
+    femenino: '#FFB6C1',
+    masculino: '#6CA6CD',
+};
+
+let charts = {};
+let filteredRecords = [];
+
+// =====================================================================
+// INIT
+// =====================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    Chart.register(ChartDataLabels);
+    populateFilters();
+    applyFilters();
+});
+
+function populateFilters() {
+    const opts = DASHBOARD_DATA.filterOptions;
+    fillSelect('filterGenero', opts.genero);
+    fillSelect('filterEdad', opts.edad);
+    fillSelect('filterAntiguedad', opts.antiguedad);
+    fillSelect('filterEstudios', opts.estudios);
+    fillSelect('filterCentro', opts.centro);
+    fillSelect('filterPlanta', opts.planta);
+}
+
+function fillSelect(id, values) {
+    const sel = document.getElementById(id);
+    values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        sel.appendChild(opt);
+    });
+}
+
+// =====================================================================
+// FILTERS
+// =====================================================================
+function applyFilters() {
+    const gf = document.getElementById('filterGenero').value;
+    const ef = document.getElementById('filterEdad').value;
+    const af = document.getElementById('filterAntiguedad').value;
+    const esf = document.getElementById('filterEstudios').value;
+    const cf = document.getElementById('filterCentro').value;
+    const pf = document.getElementById('filterPlanta').value;
+
+    filteredRecords = DASHBOARD_DATA.records.filter(r => {
+        if (gf && r.genero !== gf) return false;
+        if (ef && r.edad !== ef) return false;
+        if (af && r.antiguedad !== af) return false;
+        if (esf && r.estudios !== esf) return false;
+        if (cf && r.centro !== cf) return false;
+        if (pf && r.planta !== pf) return false;
+        return true;
+    });
+
+    updateAll();
+}
+
+function clearFilters() {
+    ['filterGenero','filterEdad','filterAntiguedad','filterEstudios','filterCentro','filterPlanta']
+        .forEach(id => document.getElementById(id).value = '');
+    applyFilters();
+}
+
+// =====================================================================
+// UPDATE ALL
+// =====================================================================
+function updateAll() {
+    updateTotalCard();
+    updatePieChart();
+    updateGenderChart();
+    updateAgeChart();
+    updateSeniorityChart();
+    updateEducationChart();
+    updateFavByQuestion();
+    updateFavByCentro();
+    updateFavByPlanta();
+    updateFavByDimension();
+    updateFavByVariable();
+    updateDetailTable();
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function destroyChart(key) {
+    if (charts[key]) { charts[key].destroy(); charts[key] = null; }
+}
+
+function countByGroup(records, field) {
+    const counts = {};
+    records.forEach(r => {
+        const val = r[field] || 'Sin dato';
+        counts[val] = (counts[val] || 0) + 1;
+    });
+    return counts;
+}
+
+function countByGroupGender(records, field, orderedKeys) {
+    const fem = {}, masc = {};
+    orderedKeys.forEach(k => { fem[k] = 0; masc[k] = 0; });
+    records.forEach(r => {
+        const val = r[field] || 'Sin dato';
+        if (!orderedKeys.includes(val)) return;
+        if (r.genero === 'Femenino') fem[val]++;
+        else masc[val]++;
+    });
+    return { fem, masc };
+}
+
+function calcFavorability(records) {
+    let total = 0, fav = 0, ind = 0, desf = 0;
+    const qKeys = DASHBOARD_DATA.questions.map(q => q.key);
+    records.forEach(r => {
+        qKeys.forEach(k => {
+            const v = r[k];
+            if (v === 1 || v === 2 || v === 3) {
+                total++;
+                if (v === 3) fav++;
+                else if (v === 2) ind++;
+                else desf++;
+            }
+        });
+    });
+    if (total === 0) return { fav: 0, ind: 0, desf: 0, total: 0 };
+    return {
+        fav: (fav / total * 100),
+        ind: (ind / total * 100),
+        desf: (desf / total * 100),
+        total,
+    };
+}
+
+function calcFavForQuestions(records, questionKeys) {
+    let total = 0, fav = 0, ind = 0, desf = 0;
+    records.forEach(r => {
+        questionKeys.forEach(k => {
+            const v = r[k];
+            if (v === 1 || v === 2 || v === 3) {
+                total++;
+                if (v === 3) fav++;
+                else if (v === 2) ind++;
+                else desf++;
+            }
+        });
+    });
+    if (total === 0) return { fav: 0, ind: 0, desf: 0 };
+    return {
+        fav: (fav / total * 100),
+        ind: (ind / total * 100),
+        desf: (desf / total * 100),
+    };
+}
+
+function shortLabel(text, maxLen = 40) {
+    if (text.length <= maxLen) return text;
+    return text.substring(0, maxLen - 3) + '...';
+}
+
+// =====================================================================
+// TOTAL CARD
+// =====================================================================
+function updateTotalCard() {
+    document.getElementById('totalEncuestados').textContent = filteredRecords.length;
+    const totalAll = DASHBOARD_DATA.records.length;
+    const pct = totalAll > 0 ? (filteredRecords.length / totalAll * 100).toFixed(1) : 0;
+    document.getElementById('totalSubtext').textContent =
+        filteredRecords.length === totalAll ? 'Sin filtros aplicados' : `${pct}% del total (${totalAll})`;
+}
+
+// =====================================================================
+// PIE CHART
+// =====================================================================
+function updatePieChart() {
+    destroyChart('pie');
+    const f = calcFavorability(filteredRecords);
+    const ctx = document.getElementById('chartPie').getContext('2d');
+
+    document.getElementById('pieStats').innerHTML = `
+        <div class="mb-2"><span style="color:${COLORS.favorable};font-weight:700;">${f.fav.toFixed(1)}%</span> Favorable</div>
+        <div class="mb-2"><span style="color:${COLORS.indeciso};font-weight:700;">${f.ind.toFixed(1)}%</span> Indeciso</div>
+        <div><span style="color:${COLORS.desfavorable};font-weight:700;">${f.desf.toFixed(1)}%</span> Desfavorable</div>
+    `;
+
+    charts.pie = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Favorable', 'Indeciso', 'Desfavorable'],
+            datasets: [{
+                data: [f.fav, f.ind, f.desf],
+                backgroundColor: [COLORS.favorable, COLORS.indeciso, COLORS.desfavorable],
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '55%',
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { font: { size: 11 } } },
+                datalabels: {
+                    color: '#fff',
+                    font: { weight: 'bold', size: 13 },
+                    formatter: v => v > 5 ? v.toFixed(1) + '%' : '',
+                },
+            },
+        },
+    });
+}
+
+// =====================================================================
+// GENDER CHART
+// =====================================================================
+function updateGenderChart() {
+    destroyChart('genero');
+    const labels = ['Femenino', 'Masculino'];
+    const counts = countByGroup(filteredRecords, 'genero');
+    const data = labels.map(l => counts[l] || 0);
+    const ctx = document.getElementById('chartGenero').getContext('2d');
+
+    charts.genero = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: [COLORS.femenino, COLORS.masculino],
+                borderRadius: 6,
+                maxBarThickness: 60,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 13 },
+                    color: '#333',
+                },
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        },
+    });
+}
+
+// =====================================================================
+// AGE CHART (grouped F/M)
+// =====================================================================
+function updateAgeChart() {
+    destroyChart('edad');
+    const order = DASHBOARD_DATA.filterOptions.edad;
+    const { fem, masc } = countByGroupGender(filteredRecords, 'edad', order);
+    const ctx = document.getElementById('chartEdad').getContext('2d');
+
+    const shortLabels = order.map(l => l.replace('Entre ', '').replace(' y menos de ', '-').replace(' a\u00f1os', '').replace('Menor de ', '<').replace(' o m\u00e1s', '+'));
+
+    charts.edad = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: shortLabels,
+            datasets: [
+                {
+                    label: 'Femenino',
+                    data: order.map(k => fem[k]),
+                    backgroundColor: COLORS.femenino,
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Masculino',
+                    data: order.map(k => masc[k]),
+                    backgroundColor: COLORS.masculino,
+                    borderRadius: 4,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { font: { size: 10 } } },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 10 },
+                    color: '#333',
+                },
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        },
+    });
+}
+
+// =====================================================================
+// SENIORITY CHART (grouped F/M)
+// =====================================================================
+function updateSeniorityChart() {
+    destroyChart('antiguedad');
+    const order = DASHBOARD_DATA.filterOptions.antiguedad;
+    const { fem, masc } = countByGroupGender(filteredRecords, 'antiguedad', order);
+    const ctx = document.getElementById('chartAntiguedad').getContext('2d');
+
+    charts.antiguedad = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: order,
+            datasets: [
+                {
+                    label: 'Femenino',
+                    data: order.map(k => fem[k]),
+                    backgroundColor: COLORS.femenino,
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Masculino',
+                    data: order.map(k => masc[k]),
+                    backgroundColor: COLORS.masculino,
+                    borderRadius: 4,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { font: { size: 10 } } },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 11 },
+                    color: '#333',
+                },
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        },
+    });
+}
+
+// =====================================================================
+// EDUCATION CHART (grouped F/M)
+// =====================================================================
+function updateEducationChart() {
+    destroyChart('estudios');
+    const order = DASHBOARD_DATA.filterOptions.estudios;
+    const { fem, masc } = countByGroupGender(filteredRecords, 'estudios', order);
+    const ctx = document.getElementById('chartEstudios').getContext('2d');
+
+    const shortLabels = order.map(l => {
+        if (l.includes('Bachiller')) return 'Bachiller';
+        if (l.includes('t\u00e9cnica')) return 'T\u00e9cnica';
+        if (l.includes('tecnol\u00f3gica')) return 'Tecnol\u00f3gica';
+        if (l.includes('profesional')) return 'Profesional';
+        if (l.includes('posgrado')) return 'Posgrado';
+        return 'Otros';
+    });
+
+    charts.estudios = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: shortLabels,
+            datasets: [
+                {
+                    label: 'Femenino',
+                    data: order.map(k => fem[k]),
+                    backgroundColor: COLORS.femenino,
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Masculino',
+                    data: order.map(k => masc[k]),
+                    backgroundColor: COLORS.masculino,
+                    borderRadius: 4,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { font: { size: 10 } } },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 10 },
+                    color: '#333',
+                },
+            },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+        },
+    });
+}
+
+// =====================================================================
+// FAVORABILITY BY QUESTION
+// =====================================================================
+function updateFavByQuestion() {
+    destroyChart('favPregunta');
+    const questions = DASHBOARD_DATA.questions;
+    const labels = questions.map((q, i) => 'P' + (i + 1));
+    const favData = [], indData = [], desfData = [];
+
+    questions.forEach(q => {
+        const f = calcFavForQuestions(filteredRecords, [q.key]);
+        favData.push(f.fav);
+        indData.push(f.ind);
+        desfData.push(f.desf);
+    });
+
+    const ctx = document.getElementById('chartFavPregunta').getContext('2d');
+
+    charts.favPregunta = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Favorable',
+                    data: favData,
+                    backgroundColor: COLORS.favorable,
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Indeciso',
+                    data: indData,
+                    backgroundColor: COLORS.indeciso,
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Desfavorable',
+                    data: desfData,
+                    backgroundColor: COLORS.desfavorable,
+                    borderRadius: 4,
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 9 },
+                    color: '#333',
+                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(items) {
+                            const idx = items[0].dataIndex;
+                            return questions[idx].text;
+                        }
+                    }
+                },
+            },
+            scales: {
+                y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
+                x: {
+                    ticks: {
+                        callback: function(value, index) {
+                            return labels[index];
+                        },
+                        font: { size: 10 },
+                    },
+                },
+            },
+        },
+        plugins: [{
+            afterDraw: function(chart) {
+                // Draw question short text under P labels
+                const xAxis = chart.scales.x;
+                const ctx2 = chart.ctx;
+                ctx2.save();
+                ctx2.font = '9px sans-serif';
+                ctx2.fillStyle = '#666';
+                ctx2.textAlign = 'center';
+                xAxis.ticks.forEach((tick, i) => {
+                    const x = xAxis.getPixelForTick(i);
+                    const txt = shortLabel(questions[i].text, 30);
+                    // wrap text
+                    const words = txt.split(' ');
+                    let lines = [], line = '';
+                    words.forEach(w => {
+                        if ((line + ' ' + w).length > 18) { lines.push(line); line = w; }
+                        else line = line ? line + ' ' + w : w;
+                    });
+                    if (line) lines.push(line);
+                    lines.slice(0, 3).forEach((l, li) => {
+                        ctx2.fillText(l, x, chart.height - 5 + (li * 10));
+                    });
+                });
+                ctx2.restore();
+            }
+        }],
+    });
+}
+
+// =====================================================================
+// FAVORABILITY BY CENTRO
+// =====================================================================
+function updateFavByCentro() {
+    destroyChart('favCentro');
+    const centros = DASHBOARD_DATA.filterOptions.centro;
+    const favData = [], indData = [], desfData = [];
+
+    centros.forEach(c => {
+        const recs = filteredRecords.filter(r => r.centro === c);
+        const f = calcFavorability(recs);
+        favData.push(f.fav);
+        indData.push(f.ind);
+        desfData.push(f.desf);
+    });
+
+    const ctx = document.getElementById('chartFavCentro').getContext('2d');
+    charts.favCentro = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: centros,
+            datasets: [
+                { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
+                { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
+                { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 11 },
+                    color: '#333',
+                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
+                },
+            },
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+        },
+    });
+}
+
+// =====================================================================
+// FAVORABILITY BY PLANTA
+// =====================================================================
+function updateFavByPlanta() {
+    destroyChart('favPlanta');
+    const plantas = DASHBOARD_DATA.filterOptions.planta;
+    const favData = [], indData = [], desfData = [];
+
+    plantas.forEach(p => {
+        const recs = filteredRecords.filter(r => r.planta === p);
+        const f = calcFavorability(recs);
+        favData.push(f.fav);
+        indData.push(f.ind);
+        desfData.push(f.desf);
+    });
+
+    const ctx = document.getElementById('chartFavPlanta').getContext('2d');
+    charts.favPlanta = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: plantas.map(p => shortLabel(p, 20)),
+            datasets: [
+                { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
+                { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
+                { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 10 },
+                    color: '#333',
+                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
+                },
+            },
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+        },
+    });
+}
+
+// =====================================================================
+// FAVORABILITY BY DIMENSION
+// =====================================================================
+function updateFavByDimension() {
+    destroyChart('favDimension');
+    const dimMap = {};
+    DASHBOARD_DATA.questions.forEach(q => {
+        if (!dimMap[q.dimension]) dimMap[q.dimension] = [];
+        dimMap[q.dimension].push(q.key);
+    });
+
+    const dims = Object.keys(dimMap);
+    const favData = [], indData = [], desfData = [];
+
+    dims.forEach(d => {
+        const f = calcFavForQuestions(filteredRecords, dimMap[d]);
+        favData.push(f.fav);
+        indData.push(f.ind);
+        desfData.push(f.desf);
+    });
+
+    const ctx = document.getElementById('chartFavDimension').getContext('2d');
+    charts.favDimension = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dims,
+            datasets: [
+                { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
+                { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
+                { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 11 },
+                    color: '#333',
+                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
+                },
+            },
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+        },
+    });
+}
+
+// =====================================================================
+// FAVORABILITY BY VARIABLE
+// =====================================================================
+function updateFavByVariable() {
+    destroyChart('favVariable');
+    const varMap = {};
+    DASHBOARD_DATA.questions.forEach(q => {
+        if (!varMap[q.variable]) varMap[q.variable] = [];
+        varMap[q.variable].push(q.key);
+    });
+
+    const vars = Object.keys(varMap);
+    const favData = [], indData = [], desfData = [];
+
+    vars.forEach(v => {
+        const f = calcFavForQuestions(filteredRecords, varMap[v]);
+        favData.push(f.fav);
+        indData.push(f.ind);
+        desfData.push(f.desf);
+    });
+
+    const ctx = document.getElementById('chartFavVariable').getContext('2d');
+    charts.favVariable = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: vars.map(v => shortLabel(v, 25)),
+            datasets: [
+                { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
+                { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
+                { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    font: { weight: 'bold', size: 10 },
+                    color: '#333',
+                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
+                },
+            },
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
+        },
+    });
+}
+
+// =====================================================================
+// DETAIL TABLE
+// =====================================================================
+function updateDetailTable() {
+    const tbody = document.getElementById('detailTableBody');
+    const questions = DASHBOARD_DATA.questions;
+
+    // Group by dimension -> variable -> questions
+    const dimGroups = {};
+    questions.forEach(q => {
+        if (!dimGroups[q.dimension]) dimGroups[q.dimension] = {};
+        if (!dimGroups[q.dimension][q.variable]) dimGroups[q.dimension][q.variable] = [];
+        dimGroups[q.dimension][q.variable].push(q);
+    });
+
+    let html = '';
+    const dimOrder = ['Respeto', 'Imparcialidad', 'Credibilidad', 'Compa\u00f1erismo', 'Preguntas Abierta'];
+
+    dimOrder.forEach(dim => {
+        if (!dimGroups[dim]) return;
+        const variables = dimGroups[dim];
+        const varNames = Object.keys(variables);
+        let dimRowSpan = 0;
+        varNames.forEach(v => dimRowSpan += variables[v].length);
+
+        let dimWritten = false;
+        varNames.forEach(varName => {
+            const qs = variables[varName];
+            let varWritten = false;
+            qs.forEach(q => {
+                const f = calcFavForQuestions(filteredRecords, [q.key]);
+                html += '<tr>';
+
+                if (!dimWritten) {
+                    html += `<td rowspan="${dimRowSpan}" style="font-weight:700;background:#f8f9fa;vertical-align:middle;">${dim}</td>`;
+                    dimWritten = true;
+                }
+
+                if (!varWritten) {
+                    html += `<td rowspan="${qs.length}" style="font-weight:600;vertical-align:middle;">${varName}</td>`;
+                    varWritten = true;
+                }
+
+                html += `<td style="font-size:0.78rem;">${shortLabel(q.text, 60)}</td>`;
+                html += `<td class="text-center" style="color:${COLORS.favorable};font-weight:700;">${f.fav.toFixed(1)}%</td>`;
+                html += `<td class="text-center" style="color:${COLORS.indeciso};font-weight:700;">${f.ind.toFixed(1)}%</td>`;
+                html += `<td class="text-center" style="color:${COLORS.desfavorable};font-weight:700;">${f.desf.toFixed(1)}%</td>`;
+                html += `<td>
+                    <div class="mini-bar-container">
+                        <div class="mini-bar" style="width:${f.fav}%;background:${COLORS.favorable};">${f.fav > 8 ? f.fav.toFixed(0) + '%' : ''}</div>
+                        <div class="mini-bar" style="width:${f.ind}%;background:${COLORS.indeciso};">${f.ind > 8 ? f.ind.toFixed(0) + '%' : ''}</div>
+                        <div class="mini-bar" style="width:${f.desf}%;background:${COLORS.desfavorable};">${f.desf > 8 ? f.desf.toFixed(0) + '%' : ''}</div>
+                    </div>
+                </td>`;
+                html += '</tr>';
+            });
+        });
+    });
+
+    tbody.innerHTML = html;
+}
+
+// =====================================================================
+// EXPORT CSV
+// =====================================================================
+function exportCSV() {
+    const questions = DASHBOARD_DATA.questions;
+    const headers = ['ID', 'Genero', 'Edad', 'Antiguedad', 'Estudios', 'Centro', 'Planta'];
+    questions.forEach(q => headers.push(q.text));
+
+    const rows = filteredRecords.map(r => {
+        const row = [r.id, r.genero, r.edad, r.antiguedad, r.estudios, r.centro, r.planta];
+        questions.forEach(q => row.push(r[q.key]));
+        return row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csv = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pulso_cultura_filtrado.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    Swal.fire({
+        icon: 'success',
+        title: 'CSV Exportado',
+        text: `Se exportaron ${filteredRecords.length} registros filtrados.`,
+        timer: 2500,
+        showConfirmButton: false,
+    });
+}
+</script>
+
+</body>
+</html>
