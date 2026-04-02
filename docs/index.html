@@ -55,6 +55,7 @@
             position: fixed; inset: 0; z-index: 9999;
             background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
             display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.2s ease;
         }
         #auth-overlay .auth-box {
             background: #fff; border-radius: 16px; padding: 2.5rem 2rem;
@@ -1096,35 +1097,47 @@ function exportCSV() {
 </div><!-- /app-content -->
 
 <script>
+    var overlay = document.getElementById("auth-overlay");
+
+    function showOverlay()  { overlay.style.display = "flex";  overlay.style.pointerEvents = "auto";  }
+    function hideOverlay()  { overlay.style.display = "none";  overlay.style.pointerEvents = "none";  }
+    function fadeOverlay()  { overlay.style.opacity = "0";     overlay.style.pointerEvents = "none";  }
+    function restoreOverlay() { overlay.style.opacity = "1";   overlay.style.pointerEvents = "auto";  }
+
     function handleLogin() {
-        var err = document.getElementById("login-error");
         if (typeof netlifyIdentity === "undefined") {
-            err.textContent = "Error: el widget de Identity no cargó. Verifica tu conexión.";
+            var err = document.getElementById("login-error");
+            err.textContent = "Error: el widget de Identity no cargó. Recarga la página.";
             err.style.display = "block";
             return;
         }
-        try {
-            netlifyIdentity.open();
-        } catch(e) {
-            err.textContent = "Error al abrir login: " + e.message;
-            err.style.display = "block";
-        }
+        // Fade out overlay so Identity modal sea visible
+        fadeOverlay();
+        netlifyIdentity.open();
     }
 
     netlifyIdentity.on("init", function(user) {
         if (user) {
-            document.getElementById("auth-overlay").style.display = "none";
+            hideOverlay();
             document.getElementById("app-content").style.display = "block";
+        } else {
+            restoreOverlay();
         }
     });
     netlifyIdentity.on("login", function() {
-        document.getElementById("auth-overlay").style.display = "none";
+        hideOverlay();
         document.getElementById("app-content").style.display = "block";
         netlifyIdentity.close();
     });
+    netlifyIdentity.on("close", function() {
+        // Si cerró sin loguearse, restaurar overlay
+        if (!netlifyIdentity.currentUser()) {
+            restoreOverlay();
+        }
+    });
     netlifyIdentity.on("logout", function() {
         document.getElementById("app-content").style.display = "none";
-        document.getElementById("auth-overlay").style.display = "flex";
+        showOverlay();
     });
 </script>
 
