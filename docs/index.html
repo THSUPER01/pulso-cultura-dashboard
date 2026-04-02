@@ -1095,9 +1095,6 @@ function exportCSV() {
 </div><!-- /app-content -->
 
 <script>
-    netlifyIdentity.init({
-        APIUrl: "https://starlit-otter-49878b.netlify.app/.netlify/identity"
-    });
     netlifyIdentity.on("init", function(user) {
         if (user) {
             document.getElementById("auth-overlay").style.display = "none";
