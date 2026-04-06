@@ -224,16 +224,169 @@ def read_and_process(filepath):
     }
 
 
-def render_dashboard(data):
-    """Render Jinja2 template with embedded data."""
+def generate_aggregates(data):
+    """Generate aggregated statistics from records (no PII, no individual records)."""
+    records = data["records"]
+    questions = data["questions"]
+    filter_options = data["filterOptions"]
+
+    aggregates = {
+        "totalRecords": len(records),
+        "favorabilidadPorPregunta": {},
+        "favorabilidadPorDimension": {},
+        "favorabilidadPorVariable": {},
+        "favorabilidadPorCentro": {},
+        "favorabilidadPorPlanta": {},
+        "favorabilidadPorGenero": {},
+        "favorabilidadPorEdad": {},
+        "favorabilidadPorAntiguedad": {},
+        "favorabilidadPorEstudios": {},
+    }
+
+    def calc_favorabilidad(values_list):
+        total = len(values_list)
+        if total == 0:
+            return {"favorable": 0, "indeciso": 0, "desfavorable": 0}
+        favorable = sum(1 for v in values_list if v == 1)
+        indeciso = sum(1 for v in values_list if v == 0)
+        desfavorable = sum(1 for v in values_list if v == -1)
+        return {
+            "favorable": round(favorable / total * 100, 1),
+            "indeciso": round(indeciso / total * 100, 1),
+            "desfavorable": round(desfavorable / total * 100, 1),
+        }
+
+    for i, q in enumerate(questions):
+        q_key = f"q{i}"
+        values = [r.get(q_key, 0) for r in records]
+        aggregates["favorabilidadPorPregunta"][q["text"]] = {
+            **calc_favorabilidad(values),
+            "dimension": q["dimension"],
+            "variable": q["variable"],
+        }
+
+    dimensions = {}
+    for q in questions:
+        dim = q["dimension"]
+        if dim not in dimensions:
+            dimensions[dim] = []
+        q_key = f"q{questions.index(q)}"
+        dimensions[dim].extend([r.get(q_key, 0) for r in records])
+
+    for dim, values in dimensions.items():
+        aggregates["favorabilidadPorDimension"][dim] = calc_favorabilidad(values)
+
+    variables = {}
+    for q in questions:
+        var = q["variable"]
+        if var not in variables:
+            variables[var] = []
+        q_key = f"q{questions.index(q)}"
+        variables[var].extend([r.get(q_key, 0) for r in records])
+
+    for var, values in variables.items():
+        aggregates["favorabilidadPorVariable"][var] = calc_favorabilidad(values)
+
+    centros = {}
+    for r in records:
+        centro = r.get("centro", "N/A")
+        if centro not in centros:
+            centros[centro] = []
+        for i in range(len(questions)):
+            centros[centro].append(r.get(f"q{i}", 0))
+
+    for centro, values in centros.items():
+        aggregates["favorabilidadPorCentro"][centro] = calc_favorabilidad(values)
+
+    plantas = {}
+    for r in records:
+        planta = r.get("planta", "N/A")
+        if planta not in plantas:
+            plantas[planta] = []
+        for i in range(len(questions)):
+            plantas[planta].append(r.get(f"q{i}", 0))
+
+    for planta, values in plantas.items():
+        aggregates["favorabilidadPorPlanta"][planta] = calc_favorabilidad(values)
+
+    generos = {}
+    for r in records:
+        genero = r.get("genero", "N/A")
+        if genero not in generos:
+            generos[genero] = []
+        for i in range(len(questions)):
+            generos[genero].append(r.get(f"q{i}", 0))
+
+    for genero, values in generos.items():
+        aggregates["favorabilidadPorGenero"][genero] = calc_favorabilidad(values)
+
+    edades = {}
+    for r in records:
+        edad = r.get("edad", "N/A")
+        if edad not in edades:
+            edades[edad] = []
+        for i in range(len(questions)):
+            edades[edad].append(r.get(f"q{i}", 0))
+
+    for edad, values in edades.items():
+        aggregates["favorabilidadPorEdad"][edad] = calc_favorabilidad(values)
+
+    antiguedades = {}
+    for r in records:
+        antiguedad = r.get("antiguedad", "N/A")
+        if antiguedad not in antiguedades:
+            antiguedades[antiguedad] = []
+        for i in range(len(questions)):
+            antiguedades[antiguedad].append(r.get(f"q{i}", 0))
+
+    for antiguedad, values in antiguedades.items():
+        aggregates["favorabilidadPorAntiguedad"][antiguedad] = calc_favorabilidad(values)
+
+    estudios_dict = {}
+    for r in records:
+        estudios = r.get("estudios", "N/A")
+        if estudios not in estudios_dict:
+            estudios_dict[estudios] = []
+        for i in range(len(questions)):
+            estudios_dict[estudios].append(r.get(f"q{i}", 0))
+
+    for estudios, values in estudios_dict.items():
+        aggregates["favorabilidadPorEstudios"][estudios] = calc_favorabilidad(values)
+
+    return aggregates
+
+
+def save_dashboard_data_for_api(data):
+    """Save aggregated data + metadata for Netlify API function."""
+    aggregates = generate_aggregates(data)
+
+    api_data = {
+        "questions": data["questions"],
+        "filterOptions": data["filterOptions"],
+        "aggregates": aggregates,
+        "timestamp": pd.Timestamp.now().isoformat(),
+    }
+
+    cache_dir = os.path.join(BASE_DIR, "functions", "cache")
+    os.makedirs(cache_dir, exist_ok=True)
+
+    cache_file = os.path.join(cache_dir, "dashboard_data.json")
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(api_data, f, ensure_ascii=False, indent=2)
+
+    print(f"API data saved: {cache_file}")
+    return api_data
+
+
+def render_dashboard(data_for_template):
+    """Render Jinja2 template with metadata (NO individual records)."""
     env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=False,
     )
     template = env.get_template("dashboard.html.j2")
 
-    # Convert data to JSON string for embedding
-    data_json = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    data_json = json.dumps(data_for_template, ensure_ascii=False, separators=(",", ":"))
 
     html = template.render(dashboard_data_json=data_json)
 
@@ -242,14 +395,26 @@ def render_dashboard(data):
         f.write(html)
 
     print(f"Dashboard generated: {OUTPUT_FILE}")
-    print(f"Records: {len(data['records'])}, Questions: {len(data['questions'])}")
+    print(f"Template includes: Questions metadata + Filter options (NO raw records)")
 
 
 def main():
     xlsx_path = find_xlsx()
     print(f"Reading: {xlsx_path}")
     data = read_and_process(xlsx_path)
-    render_dashboard(data)
+
+    # Save aggregated data for API (includes records for aggregation only)
+    api_data = save_dashboard_data_for_api(data)
+
+    # Prepare template data: metadata only (NO individual records)
+    template_data = {
+        "questions": data["questions"],
+        "filterOptions": data["filterOptions"],
+    }
+
+    # Render dashboard template
+    render_dashboard(template_data)
+    print(f"Total records processed: {len(data['records'])}")
 
 
 if __name__ == "__main__":

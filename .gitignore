@@ -4,3 +4,6 @@ __pycache__/
 .venv/
 *.tmp
 ~$*.xlsx
+node_modules/
+.netlify/
+functions/node_modules/

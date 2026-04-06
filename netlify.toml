@@ -1,0 +1,24 @@
+[build]
+  publish = "docs"
+  functions = "functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Redirect unauthenticated requests to functions that require auth
+[[redirects]]
+  from = "/.netlify/functions/dashboard"
+  to = "/.netlify/functions/dashboard"
+  status = 200
+
+# Enable Netlify Identity
+[identity]
+  provider = "netlifyidentity"
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
