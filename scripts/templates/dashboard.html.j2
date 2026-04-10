@@ -15,12 +15,20 @@
             --masculino: #6CA6CD;
             --bg-body: #f0f2f5;
             --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --text-main: #24324a;
+            --text-muted: #64748b;
+            --border-soft: #e2e8f0;
+            --panel-soft: #f8f9fd;
         }
-        body { background: var(--bg-body); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        * { box-sizing: border-box; }
+        body { background: var(--bg-body); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: var(--text-main); min-width: 320px; }
         .dashboard-header {
             background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
             color: #fff; padding: 1.2rem 0; margin-bottom: 1.5rem;
         }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+        .header-copy { min-width: 0; }
+        .header-actions { flex-shrink: 0; }
         .dashboard-header h1 { font-size: 1.6rem; font-weight: 700; margin: 0; }
         .dashboard-header .subtitle { opacity: 0.85; font-size: 0.9rem; }
         .card { border: none; border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 1.2rem; }
@@ -33,8 +41,46 @@
         .filter-label { font-size: 0.8rem; font-weight: 600; color: #495057; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-select { border-radius: 8px; border-color: #dee2e6; font-size: 0.875rem; }
         .form-select:focus { border-color: #1a237e; box-shadow: 0 0 0 0.2rem rgba(26,35,126,0.15); }
-        .chart-container { position: relative; width: 100%; }
-        .chart-container.pie { max-width: 300px; margin: 0 auto; }
+        .chart-container { position: relative; width: 100%; min-height: 240px; }
+        .chart-container canvas { width: 100% !important; height: 100% !important; }
+        .chart-container.chart-sm { min-height: 220px; }
+        .chart-container.chart-md { min-height: 300px; }
+        .chart-container.chart-lg { min-height: 380px; }
+        .chart-container.chart-xl { min-height: 500px; }
+        .chart-container.pie { min-height: 250px; max-width: 300px; margin: 0 auto; }
+        .pie-panel { display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+        .pie-stats { min-width: 200px; }
+        .pie-stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            background: var(--panel-soft);
+            border: 1px solid var(--border-soft);
+            border-radius: 10px;
+            padding: 0.65rem 0.8rem;
+            margin-bottom: 0.6rem;
+            color: var(--text-main);
+        }
+        .pie-stat-item:last-child { margin-bottom: 0; }
+        .pie-stat-label { font-size: 0.85rem; color: var(--text-muted); }
+        .pie-stat-value { font-size: 1rem; font-weight: 700; }
+        .question-reference {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.65rem;
+            margin-top: 1rem;
+        }
+        .question-chip {
+            background: var(--panel-soft);
+            border: 1px solid var(--border-soft);
+            border-radius: 10px;
+            padding: 0.7rem 0.8rem;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            color: #334155;
+        }
+        .question-chip strong { color: #1a237e; }
         .btn-export { background: #1a237e; border: none; font-size: 0.85rem; border-radius: 8px; }
         .btn-export:hover { background: #283593; }
         .btn-clear { font-size: 0.85rem; border-radius: 8px; }
@@ -44,9 +90,34 @@
         .mini-bar-container { display: flex; height: 22px; border-radius: 4px; overflow: hidden; min-width: 150px; }
         .mini-bar { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; font-weight: 600; }
         .filter-divider { border-left: 2px solid #dee2e6; }
+        .table-responsive { -webkit-overflow-scrolling: touch; }
+        @media (max-width: 991.98px) {
+            .header-inner { flex-direction: column; align-items: stretch; }
+            .header-actions { width: 100%; }
+            .btn-export { width: 100%; }
+            .container-fluid.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+        }
         @media (max-width: 768px) {
             .filter-divider { border-left: none; border-top: 2px solid #dee2e6; padding-top: 1rem; margin-top: 1rem; }
-            .kpi-number { font-size: 2rem; }
+            .kpi-number { font-size: 2.2rem; }
+            .section-title { font-size: 1rem; }
+            .card-header { font-size: 0.95rem; }
+            .chart-container.chart-sm { min-height: 210px; }
+            .chart-container.chart-md { min-height: 260px; }
+            .chart-container.chart-lg { min-height: 340px; }
+            .chart-container.chart-xl { min-height: 460px; }
+            .chart-container.pie { max-width: none; min-height: 230px; }
+            .pie-panel { flex-direction: column; align-items: stretch; }
+            .pie-stats { min-width: 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; }
+            .pie-stat-item { margin-bottom: 0; min-height: 72px; }
+            .question-reference { grid-template-columns: 1fr; }
+            .detail-table { font-size: 0.76rem; }
+            .mini-bar-container { min-width: 120px; }
+        }
+        @media (max-width: 575.98px) {
+            .dashboard-header h1 { font-size: 1.2rem; }
+            .dashboard-header .subtitle { font-size: 0.8rem; }
+            .pie-stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -55,14 +126,16 @@
 <!-- Header -->
 <div class="dashboard-header">
     <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
+        <div class="header-inner">
+            <div class="header-copy">
                 <h1><i class="bi bi-bar-chart-fill me-2"></i>Pulso Cultura - Dashboard de Resultados</h1>
                 <div class="subtitle">Super de Alimentos S.A. | Encuesta de Clima Organizacional</div>
             </div>
-            <button class="btn btn-light btn-export" onclick="exportCSV()">
-                <i class="bi bi-download me-1"></i> Exportar CSV
-            </button>
+            <div class="header-actions">
+                <button class="btn btn-light btn-export" onclick="exportCSV()">
+                    <i class="bi bi-download me-1"></i> Exportar CSV
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -129,7 +202,7 @@
                     </div>
                 </div>
                 <!-- Clear button -->
-                <div class="col-lg-1 d-flex align-items-end justify-content-end">
+                <div class="col-lg-1 d-flex align-items-end justify-content-end mt-3 mt-lg-0">
                     <button class="btn btn-outline-secondary btn-clear btn-sm w-100" onclick="clearFilters()">
                         <i class="bi bi-x-circle me-1"></i>Limpiar
                     </button>
@@ -152,11 +225,11 @@
         <div class="col-md-8">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-pie-chart-fill me-2 text-success"></i>Favorabilidad Global</div>
-                <div class="card-body d-flex align-items-center justify-content-center">
+                <div class="card-body pie-panel">
                     <div class="chart-container pie">
                         <canvas id="chartPie"></canvas>
                     </div>
-                    <div id="pieStats" class="ms-4" style="font-size:0.9rem;"></div>
+                    <div id="pieStats" class="pie-stats"></div>
                 </div>
             </div>
         </div>
@@ -168,25 +241,25 @@
         <div class="col-md-6 col-xl-3">
             <div class="card h-100">
                 <div class="card-header">Genero</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartGenero"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-sm"><canvas id="chartGenero"></canvas></div></div>
             </div>
         </div>
         <div class="col-md-6 col-xl-3">
             <div class="card h-100">
                 <div class="card-header">Edad</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartEdad"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-sm"><canvas id="chartEdad"></canvas></div></div>
             </div>
         </div>
         <div class="col-md-6 col-xl-3">
             <div class="card h-100">
                 <div class="card-header">Antiguedad</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartAntiguedad"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-sm"><canvas id="chartAntiguedad"></canvas></div></div>
             </div>
         </div>
         <div class="col-md-6 col-xl-3">
             <div class="card h-100">
                 <div class="card-header">Estudios Cursados</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartEstudios"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-sm"><canvas id="chartEstudios"></canvas></div></div>
             </div>
         </div>
     </div>
@@ -198,7 +271,8 @@
     <div class="card mb-4">
         <div class="card-header"><i class="bi bi-bar-chart-steps me-2 text-success"></i>Favorabilidad por Pregunta</div>
         <div class="card-body">
-            <div class="chart-container" style="min-height:400px;"><canvas id="chartFavPregunta"></canvas></div>
+            <div class="chart-container chart-xl"><canvas id="chartFavPregunta"></canvas></div>
+            <div id="questionReference" class="question-reference"></div>
         </div>
     </div>
 
@@ -206,13 +280,13 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-building me-2 text-primary"></i>Favorabilidad por Centro</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartFavCentro"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-md"><canvas id="chartFavCentro"></canvas></div></div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-diagram-3 me-2 text-info"></i>Favorabilidad por Planta</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartFavPlanta"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-md"><canvas id="chartFavPlanta"></canvas></div></div>
             </div>
         </div>
     </div>
@@ -224,13 +298,13 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-layers me-2 text-warning"></i>Favorabilidad por Dimension</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartFavDimension"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-md"><canvas id="chartFavDimension"></canvas></div></div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header"><i class="bi bi-tags me-2 text-danger"></i>Favorabilidad por Variable</div>
-                <div class="card-body"><div class="chart-container"><canvas id="chartFavVariable"></canvas></div></div>
+                <div class="card-body"><div class="chart-container chart-md"><canvas id="chartFavVariable"></canvas></div></div>
             </div>
         </div>
     </div>
@@ -283,14 +357,26 @@ const COLORS = {
     masculino: '#6CA6CD',
 };
 
+const BREAKPOINTS = {
+    mobile: 576,
+    desktop: 992,
+};
+
 let charts = {};
 let filteredRecords = [];
+let currentViewportBucket = getViewportBucket();
 
 // =====================================================================
 // INIT
 // =====================================================================
 document.addEventListener('DOMContentLoaded', () => {
     Chart.register(ChartDataLabels);
+    Chart.defaults.animation = false;
+    Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
+    Chart.defaults.color = '#475569';
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.boxWidth = 10;
+    Chart.defaults.elements.bar.borderSkipped = false;
     populateFilters();
     applyFilters();
 });
@@ -356,6 +442,7 @@ function updateAll() {
     updateSeniorityChart();
     updateEducationChart();
     updateFavByQuestion();
+    updateQuestionReference();
     updateFavByCentro();
     updateFavByPlanta();
     updateFavByDimension();
@@ -386,7 +473,7 @@ function countByGroupGender(records, field, orderedKeys) {
         const val = r[field] || 'Sin dato';
         if (!orderedKeys.includes(val)) return;
         if (r.genero === 'Femenino') fem[val]++;
-        else masc[val]++;
+        else if (r.genero === 'Masculino') masc[val]++;
     });
     return { fem, masc };
 }
@@ -440,6 +527,165 @@ function shortLabel(text, maxLen = 40) {
     return text.substring(0, maxLen - 3) + '...';
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function wrapLabel(text, maxLineLength = 18, maxLines = 2) {
+    const truncated = shortLabel(String(text), maxLineLength * maxLines + 10);
+    const words = truncated.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = '';
+
+    words.forEach(word => {
+        const nextLine = line ? `${line} ${word}` : word;
+        if (nextLine.length > maxLineLength && line) {
+            lines.push(line);
+            line = word;
+        } else {
+            line = nextLine;
+        }
+    });
+
+    if (line) lines.push(line);
+    return lines.slice(0, maxLines);
+}
+
+function getViewportBucket() {
+    if (window.innerWidth < BREAKPOINTS.mobile) return 'mobile';
+    if (window.innerWidth < BREAKPOINTS.desktop) return 'tablet';
+    return 'desktop';
+}
+
+function isMobileScreen() {
+    return currentViewportBucket === 'mobile';
+}
+
+function isCompactScreen() {
+    return currentViewportBucket !== 'desktop';
+}
+
+function getFixedChartHeight(size) {
+    const heights = {
+        pie: { desktop: 250, tablet: 240, mobile: 220 },
+        sm: { desktop: 220, tablet: 215, mobile: 200 },
+        md: { desktop: 300, tablet: 280, mobile: 260 },
+    };
+    return heights[size][currentViewportBucket];
+}
+
+function getLongChartHeight(categoryCount, baseHeight = 120, rowHeight = 26) {
+    const adjustedRowHeight = isMobileScreen() ? rowHeight + 8 : rowHeight;
+    return Math.max(baseHeight, baseHeight + (categoryCount * adjustedRowHeight));
+}
+
+function setChartHeight(canvasId, height) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !canvas.parentElement) return;
+    canvas.parentElement.style.height = `${height}px`;
+}
+
+function getLegendOptions(position = 'top') {
+    return {
+        display: true,
+        position,
+        labels: {
+            font: { size: isMobileScreen() ? 10 : 11 },
+            padding: isMobileScreen() ? 10 : 14,
+        },
+    };
+}
+
+function getDataLabelOptions({ percent = false, decimals = 1, minValue = 0, categoryCount = 0, forceDisplay = false, horizontal = false }) {
+    const shouldDisplay = forceDisplay || (!isMobileScreen() && categoryCount <= 6);
+    return {
+        display: shouldDisplay,
+        anchor: 'end',
+        align: horizontal ? 'right' : 'end',
+        clamp: true,
+        clip: false,
+        color: '#334155',
+        font: { weight: 'bold', size: isCompactScreen() ? 9 : 10 },
+        formatter: value => {
+            const numericValue = Number(value) || 0;
+            if (numericValue <= minValue) return '';
+            return percent ? `${numericValue.toFixed(decimals)}%` : `${Math.round(numericValue)}`;
+        },
+    };
+}
+
+function getBarScales({ percent = false, horizontal = false }) {
+    const valueScale = {
+        beginAtZero: true,
+        grid: { color: 'rgba(15, 23, 42, 0.08)' },
+        ticks: {
+            color: '#64748b',
+            font: { size: isMobileScreen() ? 9 : 11 },
+        },
+    };
+
+    if (percent) {
+        valueScale.max = 100;
+        valueScale.ticks.callback = value => `${value}%`;
+    } else {
+        valueScale.ticks.precision = 0;
+    }
+
+    const categoryScale = {
+        grid: { display: false },
+        ticks: {
+            color: '#334155',
+            autoSkip: false,
+            font: { size: isMobileScreen() ? 9 : 10 },
+            maxRotation: horizontal ? 0 : (isCompactScreen() ? 28 : 0),
+            minRotation: horizontal ? 0 : (isCompactScreen() ? 28 : 0),
+        },
+    };
+
+    return horizontal ? { x: valueScale, y: categoryScale } : { x: categoryScale, y: valueScale };
+}
+
+function getCommonChartOptions({ percent = false, horizontal = false, legendPosition = 'top', categoryCount = 0, dataLabelMinValue = 0, forceDataLabels = false }) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        resizeDelay: 150,
+        indexAxis: horizontal ? 'y' : 'x',
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        layout: {
+            padding: {
+                top: 8,
+                right: 12,
+                left: 4,
+                bottom: 4,
+            },
+        },
+        plugins: {
+            legend: getLegendOptions(legendPosition),
+            datalabels: getDataLabelOptions({
+                percent,
+                minValue: dataLabelMinValue,
+                categoryCount,
+                forceDisplay: forceDataLabels,
+                horizontal,
+            }),
+            tooltip: {
+                backgroundColor: '#0f172a',
+                padding: 10,
+            },
+        },
+        scales: getBarScales({ percent, horizontal }),
+    };
+}
+
 // =====================================================================
 // TOTAL CARD
 // =====================================================================
@@ -456,13 +702,23 @@ function updateTotalCard() {
 // =====================================================================
 function updatePieChart() {
     destroyChart('pie');
+    setChartHeight('chartPie', getFixedChartHeight('pie'));
     const f = calcFavorability(filteredRecords);
     const ctx = document.getElementById('chartPie').getContext('2d');
 
     document.getElementById('pieStats').innerHTML = `
-        <div class="mb-2"><span style="color:${COLORS.favorable};font-weight:700;">${f.fav.toFixed(1)}%</span> Favorable</div>
-        <div class="mb-2"><span style="color:${COLORS.indeciso};font-weight:700;">${f.ind.toFixed(1)}%</span> Indeciso</div>
-        <div><span style="color:${COLORS.desfavorable};font-weight:700;">${f.desf.toFixed(1)}%</span> Desfavorable</div>
+        <div class="pie-stat-item">
+            <span class="pie-stat-label">Favorable</span>
+            <span class="pie-stat-value" style="color:${COLORS.favorable};">${f.fav.toFixed(1)}%</span>
+        </div>
+        <div class="pie-stat-item">
+            <span class="pie-stat-label">Indeciso</span>
+            <span class="pie-stat-value" style="color:${COLORS.indeciso};">${f.ind.toFixed(1)}%</span>
+        </div>
+        <div class="pie-stat-item">
+            <span class="pie-stat-label">Desfavorable</span>
+            <span class="pie-stat-value" style="color:${COLORS.desfavorable};">${f.desf.toFixed(1)}%</span>
+        </div>
     `;
 
     charts.pie = new Chart(ctx, {
@@ -478,13 +734,15 @@ function updatePieChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
-            cutout: '55%',
+            maintainAspectRatio: false,
+            resizeDelay: 150,
+            cutout: isMobileScreen() ? '52%' : '58%',
             plugins: {
-                legend: { display: true, position: 'bottom', labels: { font: { size: 11 } } },
+                legend: getLegendOptions('bottom'),
                 datalabels: {
+                    display: !isMobileScreen(),
                     color: '#fff',
-                    font: { weight: 'bold', size: 13 },
+                    font: { weight: 'bold', size: 12 },
                     formatter: v => v > 5 ? v.toFixed(1) + '%' : '',
                 },
             },
@@ -497,6 +755,7 @@ function updatePieChart() {
 // =====================================================================
 function updateGenderChart() {
     destroyChart('genero');
+    setChartHeight('chartGenero', getFixedChartHeight('sm'));
     const labels = ['Femenino', 'Masculino'];
     const counts = countByGroup(filteredRecords, 'genero');
     const data = labels.map(l => counts[l] || 0);
@@ -513,19 +772,11 @@ function updateGenderChart() {
                 maxBarThickness: 60,
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 13 },
-                    color: '#333',
-                },
-            },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-        },
+        options: (() => {
+            const options = getCommonChartOptions({ categoryCount: labels.length, dataLabelMinValue: 0, forceDataLabels: true });
+            options.plugins.legend.display = false;
+            return options;
+        })(),
     });
 }
 
@@ -534,6 +785,7 @@ function updateGenderChart() {
 // =====================================================================
 function updateAgeChart() {
     destroyChart('edad');
+    setChartHeight('chartEdad', getFixedChartHeight('sm'));
     const order = DASHBOARD_DATA.filterOptions.edad;
     const { fem, masc } = countByGroupGender(filteredRecords, 'edad', order);
     const ctx = document.getElementById('chartEdad').getContext('2d');
@@ -559,19 +811,7 @@ function updateAgeChart() {
                 },
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'bottom', labels: { font: { size: 10 } } },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 10 },
-                    color: '#333',
-                },
-            },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-        },
+        options: getCommonChartOptions({ legendPosition: 'bottom', categoryCount: shortLabels.length, dataLabelMinValue: 0 }),
     });
 }
 
@@ -580,6 +820,7 @@ function updateAgeChart() {
 // =====================================================================
 function updateSeniorityChart() {
     destroyChart('antiguedad');
+    setChartHeight('chartAntiguedad', getFixedChartHeight('sm'));
     const order = DASHBOARD_DATA.filterOptions.antiguedad;
     const { fem, masc } = countByGroupGender(filteredRecords, 'antiguedad', order);
     const ctx = document.getElementById('chartAntiguedad').getContext('2d');
@@ -603,19 +844,11 @@ function updateSeniorityChart() {
                 },
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'bottom', labels: { font: { size: 10 } } },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 11 },
-                    color: '#333',
-                },
-            },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-        },
+        options: (() => {
+            const options = getCommonChartOptions({ legendPosition: 'bottom', categoryCount: order.length, dataLabelMinValue: 0 });
+            options.scales.x.ticks.callback = (value, index) => wrapLabel(order[index], 14, 2);
+            return options;
+        })(),
     });
 }
 
@@ -624,6 +857,7 @@ function updateSeniorityChart() {
 // =====================================================================
 function updateEducationChart() {
     destroyChart('estudios');
+    setChartHeight('chartEstudios', getFixedChartHeight('sm'));
     const order = DASHBOARD_DATA.filterOptions.estudios;
     const { fem, masc } = countByGroupGender(filteredRecords, 'estudios', order);
     const ctx = document.getElementById('chartEstudios').getContext('2d');
@@ -656,19 +890,7 @@ function updateEducationChart() {
                 },
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'bottom', labels: { font: { size: 10 } } },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 10 },
-                    color: '#333',
-                },
-            },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-        },
+        options: getCommonChartOptions({ legendPosition: 'bottom', categoryCount: shortLabels.length, dataLabelMinValue: 0 }),
     });
 }
 
@@ -678,7 +900,8 @@ function updateEducationChart() {
 function updateFavByQuestion() {
     destroyChart('favPregunta');
     const questions = DASHBOARD_DATA.questions;
-    const labels = questions.map((q, i) => 'P' + (i + 1));
+    setChartHeight('chartFavPregunta', getLongChartHeight(questions.length, 150, 24));
+    const labels = questions.map((q, i) => `P${i + 1}`);
     const favData = [], indData = [], desfData = [];
 
     questions.forEach(q => {
@@ -715,66 +938,30 @@ function updateFavByQuestion() {
                 },
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 9 },
-                    color: '#333',
-                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
-                },
-                tooltip: {
-                    callbacks: {
-                        title: function(items) {
-                            const idx = items[0].dataIndex;
-                            return questions[idx].text;
-                        }
-                    }
-                },
-            },
-            scales: {
-                y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
-                x: {
-                    ticks: {
-                        callback: function(value, index) {
-                            return labels[index];
-                        },
-                        font: { size: 10 },
-                    },
-                },
-            },
-        },
-        plugins: [{
-            afterDraw: function(chart) {
-                // Draw question short text under P labels
-                const xAxis = chart.scales.x;
-                const ctx2 = chart.ctx;
-                ctx2.save();
-                ctx2.font = '9px sans-serif';
-                ctx2.fillStyle = '#666';
-                ctx2.textAlign = 'center';
-                xAxis.ticks.forEach((tick, i) => {
-                    const x = xAxis.getPixelForTick(i);
-                    const txt = shortLabel(questions[i].text, 30);
-                    // wrap text
-                    const words = txt.split(' ');
-                    let lines = [], line = '';
-                    words.forEach(w => {
-                        if ((line + ' ' + w).length > 18) { lines.push(line); line = w; }
-                        else line = line ? line + ' ' + w : w;
-                    });
-                    if (line) lines.push(line);
-                    lines.slice(0, 3).forEach((l, li) => {
-                        ctx2.fillText(l, x, chart.height - 5 + (li * 10));
-                    });
-                });
-                ctx2.restore();
-            }
-        }],
+        options: (() => {
+            const options = getCommonChartOptions({
+                percent: true,
+                horizontal: true,
+                categoryCount: labels.length,
+                dataLabelMinValue: 0.5,
+            });
+            options.plugins.tooltip.callbacks = {
+                title: items => questions[items[0].dataIndex].text,
+            };
+            return options;
+        })(),
     });
+}
+
+function updateQuestionReference() {
+    const html = DASHBOARD_DATA.questions.map((q, index) => `
+        <div class="question-chip">
+            <strong>P${index + 1}</strong><br>
+            ${escapeHtml(q.text)}
+        </div>
+    `).join('');
+
+    document.getElementById('questionReference').innerHTML = html;
 }
 
 // =====================================================================
@@ -783,6 +970,7 @@ function updateFavByQuestion() {
 function updateFavByCentro() {
     destroyChart('favCentro');
     const centros = DASHBOARD_DATA.filterOptions.centro;
+    setChartHeight('chartFavCentro', getLongChartHeight(centros.length, 150, 24));
     const favData = [], indData = [], desfData = [];
 
     centros.forEach(c => {
@@ -797,26 +985,14 @@ function updateFavByCentro() {
     charts.favCentro = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: centros,
+            labels: centros.map(c => wrapLabel(c, 16, 2)),
             datasets: [
                 { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
                 { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
                 { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
             ]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 11 },
-                    color: '#333',
-                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
-                },
-            },
-            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
-        },
+        options: getCommonChartOptions({ percent: true, horizontal: true, categoryCount: centros.length, dataLabelMinValue: 0.5 }),
     });
 }
 
@@ -826,6 +1002,7 @@ function updateFavByCentro() {
 function updateFavByPlanta() {
     destroyChart('favPlanta');
     const plantas = DASHBOARD_DATA.filterOptions.planta;
+    setChartHeight('chartFavPlanta', getLongChartHeight(plantas.length, 150, 24));
     const favData = [], indData = [], desfData = [];
 
     plantas.forEach(p => {
@@ -840,26 +1017,14 @@ function updateFavByPlanta() {
     charts.favPlanta = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: plantas.map(p => shortLabel(p, 20)),
+            labels: plantas.map(p => wrapLabel(p, 16, 2)),
             datasets: [
                 { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
                 { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
                 { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
             ]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 10 },
-                    color: '#333',
-                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
-                },
-            },
-            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
-        },
+        options: getCommonChartOptions({ percent: true, horizontal: true, categoryCount: plantas.length, dataLabelMinValue: 0.5 }),
     });
 }
 
@@ -875,6 +1040,7 @@ function updateFavByDimension() {
     });
 
     const dims = Object.keys(dimMap);
+    setChartHeight('chartFavDimension', getLongChartHeight(dims.length, 170, 26));
     const favData = [], indData = [], desfData = [];
 
     dims.forEach(d => {
@@ -888,26 +1054,14 @@ function updateFavByDimension() {
     charts.favDimension = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: dims,
+            labels: dims.map(d => wrapLabel(d, 16, 2)),
             datasets: [
                 { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
                 { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
                 { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
             ]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 11 },
-                    color: '#333',
-                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
-                },
-            },
-            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
-        },
+        options: getCommonChartOptions({ percent: true, horizontal: true, categoryCount: dims.length, dataLabelMinValue: 0.5 }),
     });
 }
 
@@ -923,6 +1077,7 @@ function updateFavByVariable() {
     });
 
     const vars = Object.keys(varMap);
+    setChartHeight('chartFavVariable', getLongChartHeight(vars.length, 170, 26));
     const favData = [], indData = [], desfData = [];
 
     vars.forEach(v => {
@@ -936,26 +1091,14 @@ function updateFavByVariable() {
     charts.favVariable = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: vars.map(v => shortLabel(v, 25)),
+            labels: vars.map(v => wrapLabel(v, 18, 2)),
             datasets: [
                 { label: 'Favorable', data: favData, backgroundColor: COLORS.favorable, borderRadius: 4 },
                 { label: 'Indeciso', data: indData, backgroundColor: COLORS.indeciso, borderRadius: 4 },
                 { label: 'Desfavorable', data: desfData, backgroundColor: COLORS.desfavorable, borderRadius: 4 },
             ]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                datalabels: {
-                    anchor: 'end', align: 'end',
-                    font: { weight: 'bold', size: 10 },
-                    color: '#333',
-                    formatter: v => v > 0 ? v.toFixed(1) + '%' : '',
-                },
-            },
-            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } },
-        },
+        options: getCommonChartOptions({ percent: true, horizontal: true, categoryCount: vars.length, dataLabelMinValue: 0.5 }),
     });
 }
 
@@ -993,16 +1136,16 @@ function updateDetailTable() {
                 html += '<tr>';
 
                 if (!dimWritten) {
-                    html += `<td rowspan="${dimRowSpan}" style="font-weight:700;background:#f8f9fa;vertical-align:middle;">${dim}</td>`;
+                    html += `<td rowspan="${dimRowSpan}" style="font-weight:700;background:#f8f9fa;vertical-align:middle;">${escapeHtml(dim)}</td>`;
                     dimWritten = true;
                 }
 
                 if (!varWritten) {
-                    html += `<td rowspan="${qs.length}" style="font-weight:600;vertical-align:middle;">${varName}</td>`;
+                    html += `<td rowspan="${qs.length}" style="font-weight:600;vertical-align:middle;">${escapeHtml(varName)}</td>`;
                     varWritten = true;
                 }
 
-                html += `<td style="font-size:0.78rem;">${shortLabel(q.text, 60)}</td>`;
+                html += `<td style="font-size:0.78rem;">${escapeHtml(shortLabel(q.text, 60))}</td>`;
                 html += `<td class="text-center" style="color:${COLORS.favorable};font-weight:700;">${f.fav.toFixed(1)}%</td>`;
                 html += `<td class="text-center" style="color:${COLORS.indeciso};font-weight:700;">${f.ind.toFixed(1)}%</td>`;
                 html += `<td class="text-center" style="color:${COLORS.desfavorable};font-weight:700;">${f.desf.toFixed(1)}%</td>`;
