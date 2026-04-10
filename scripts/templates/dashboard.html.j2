@@ -65,22 +65,16 @@
         .pie-stat-item:last-child { margin-bottom: 0; }
         .pie-stat-label { font-size: 0.85rem; color: var(--text-muted); }
         .pie-stat-value { font-size: 1rem; font-weight: 700; }
-        .question-reference {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0.65rem;
-            margin-top: 1rem;
+        .chart-scroll {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.35rem;
         }
-        .question-chip {
-            background: var(--panel-soft);
-            border: 1px solid var(--border-soft);
-            border-radius: 10px;
-            padding: 0.7rem 0.8rem;
-            font-size: 0.82rem;
-            line-height: 1.4;
-            color: #334155;
+        .chart-scroll .chart-container {
+            min-width: 100%;
         }
-        .question-chip strong { color: #1a237e; }
         .btn-export { background: #1a237e; border: none; font-size: 0.85rem; border-radius: 8px; }
         .btn-export:hover { background: #283593; }
         .btn-clear { font-size: 0.85rem; border-radius: 8px; }
@@ -110,7 +104,6 @@
             .pie-panel { flex-direction: column; align-items: stretch; }
             .pie-stats { min-width: 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; }
             .pie-stat-item { margin-bottom: 0; min-height: 72px; }
-            .question-reference { grid-template-columns: 1fr; }
             .detail-table { font-size: 0.76rem; }
             .mini-bar-container { min-width: 120px; }
         }
@@ -271,8 +264,9 @@
     <div class="card mb-4">
         <div class="card-header"><i class="bi bi-bar-chart-steps me-2 text-success"></i>Favorabilidad por Pregunta</div>
         <div class="card-body">
-            <div class="chart-container chart-xl"><canvas id="chartFavPregunta"></canvas></div>
-            <div id="questionReference" class="question-reference"></div>
+            <div class="chart-scroll">
+                <div class="chart-container chart-xl" id="chartFavPreguntaWrapper"><canvas id="chartFavPregunta"></canvas></div>
+            </div>
         </div>
     </div>
 
@@ -442,7 +436,6 @@ function updateAll() {
     updateSeniorityChart();
     updateEducationChart();
     updateFavByQuestion();
-    updateQuestionReference();
     updateFavByCentro();
     updateFavByPlanta();
     updateFavByDimension();
@@ -590,6 +583,12 @@ function setChartHeight(canvasId, height) {
     canvas.parentElement.style.height = `${height}px`;
 }
 
+function setChartWidth(containerId, width) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.style.width = typeof width === 'number' ? `${width}px` : width;
+}
+
 function getLegendOptions(position = 'top') {
     return {
         display: true,
@@ -684,6 +683,15 @@ function getCommonChartOptions({ percent = false, horizontal = false, legendPosi
         },
         scales: getBarScales({ percent, horizontal }),
     };
+}
+
+function buildQuestionAxisLabel(question, index) {
+    const wrapped = wrapLabel(
+        shortLabel(question.text, isCompactScreen() ? 42 : 34),
+        isCompactScreen() ? 14 : 11,
+        isCompactScreen() ? 3 : 2
+    );
+    return [`P${index + 1}`, ...wrapped];
 }
 
 // =====================================================================
@@ -900,8 +908,9 @@ function updateEducationChart() {
 function updateFavByQuestion() {
     destroyChart('favPregunta');
     const questions = DASHBOARD_DATA.questions;
-    setChartHeight('chartFavPregunta', getLongChartHeight(questions.length, 150, 24));
-    const labels = questions.map((q, i) => `P${i + 1}`);
+    setChartHeight('chartFavPregunta', isMobileScreen() ? 430 : 390);
+    setChartWidth('chartFavPreguntaWrapper', isMobileScreen() ? Math.max(980, questions.length * 92) : '100%');
+    const labels = questions.map((q, i) => buildQuestionAxisLabel(q, i));
     const favData = [], indData = [], desfData = [];
 
     questions.forEach(q => {
@@ -941,27 +950,23 @@ function updateFavByQuestion() {
         options: (() => {
             const options = getCommonChartOptions({
                 percent: true,
-                horizontal: true,
+                horizontal: false,
                 categoryCount: labels.length,
                 dataLabelMinValue: 0.5,
             });
+            options.plugins.datalabels.display = !isCompactScreen();
             options.plugins.tooltip.callbacks = {
                 title: items => questions[items[0].dataIndex].text,
             };
+            options.scales.x.ticks.maxRotation = 0;
+            options.scales.x.ticks.minRotation = 0;
+            options.scales.x.ticks.font = { size: isCompactScreen() ? 9 : 10 };
+            options.scales.x.ticks.padding = 10;
+            options.scales.x.offset = true;
+            options.layout.padding.bottom = 8;
             return options;
         })(),
     });
-}
-
-function updateQuestionReference() {
-    const html = DASHBOARD_DATA.questions.map((q, index) => `
-        <div class="question-chip">
-            <strong>P${index + 1}</strong><br>
-            ${escapeHtml(q.text)}
-        </div>
-    `).join('');
-
-    document.getElementById('questionReference').innerHTML = html;
 }
 
 // =====================================================================
